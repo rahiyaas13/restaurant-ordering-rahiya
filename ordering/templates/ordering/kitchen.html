@@ -1,0 +1,41 @@
+{% extends "ordering/base.html" %}
+{% load static %}
+{% block title %}Kitchen{% endblock %}
+{% block content %}
+<div data-autorefresh="30">
+  <div class="d-flex align-items-baseline justify-content-between flex-wrap gap-2">
+    <h1 class="page-title mb-3">Kitchen dashboard</h1>
+    <span class="small text-muted">Auto-refreshes every 30 seconds</span>
+  </div>
+  <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3">
+    {% for col in columns %}
+    <div class="col">
+      <section class="k-col k-{{ col.code }}">
+        <h2 class="k-head">{{ col.label }} <span class="count">{{ col.orders|length }}</span></h2>
+        {% for order in col.orders %}
+        <article class="k-card">
+          <div class="d-flex justify-content-between">
+            <strong>#{{ order.pk }}</strong>
+            <span class="text-muted small">{{ order.created_at|timesince }} ago</span>
+          </div>
+          <div class="small mb-2">Table <strong>{{ order.table_number }}</strong> · {{ order.customer_name }}</div>
+          <ul class="k-items">
+            {% for line in order.items.all %}<li>{{ line.quantity }} × {{ line.menu_item.name }}</li>{% endfor %}
+          </ul>
+          {% if order.notes %}<div class="k-note"><i class="bi bi-exclamation-circle"></i> {{ order.notes }}</div>{% endif %}
+          {% if order.next_status %}
+          <form method="post" action="{% url 'kitchen_update' order.pk %}" class="mt-2">
+            {% csrf_token %}
+            <input type="hidden" name="status" value="{{ order.next_status }}">
+            <button class="btn btn-sm btn-pine w-100" type="submit">Mark {{ order.next_status_label }}</button>
+          </form>
+          {% endif %}
+        </article>
+        {% empty %}<p class="text-muted small mb-0">No orders.</p>{% endfor %}
+      </section>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/autorefresh.js' %}"></script>{% endblock %}

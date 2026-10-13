@@ -1,0 +1,65 @@
+{% extends "ordering/base.html" %}
+{% load static %}
+{% block title %}Menu{% endblock %}
+{% block content %}
+<header class="menu-head">
+  <h1>Welcome to <span>PLUVIA</span></h1>
+  <p>Browse our Indian &amp; international menu, add to cart, and we'll bring it straight to your table.</p>
+</header>
+
+<div class="filter-bar" id="filterBar">
+  <button type="button" class="chip active" data-filter="all">All</button>
+  {% for c in categories %}
+  <button type="button" class="chip" data-filter="{{ c.pk }}">{% if c.icon %}<i class="bi {{ c.icon }}"></i> {% endif %}{{ c.name }}</button>
+  {% endfor %}
+  <div class="form-check form-switch ms-md-auto">
+    <input class="form-check-input" type="checkbox" role="switch" id="vegOnly">
+    <label class="form-check-label" for="vegOnly">Vegetarian only</label>
+  </div>
+</div>
+
+{% for c in categories %}{% if c.items.all %}
+<section class="menu-section" data-category="{{ c.pk }}">
+  <h2 class="section-title">{% if c.icon %}<i class="bi {{ c.icon }}"></i>{% endif %}{{ c.name }}</h2>
+  <div class="row g-3">
+    {% for item in c.items.all %}
+    <div class="col-12 col-md-6 col-xl-4 menu-item" data-veg="{{ item.is_vegetarian|yesno:'1,0' }}">
+      <article class="dish {% if not item.is_available %}is-off{% endif %}">
+        <div class="dish-img">
+          {% if item.image_url %}<img src="{{ item.image_url }}" alt="{{ item.name }}" loading="lazy">
+          {% else %}<i class="bi {{ c.icon|default:'bi-egg-fried' }}"></i>{% endif %}
+        </div>
+        <div class="dish-body">
+          <div class="d-flex align-items-start gap-2">
+            <span class="diet-mark {% if item.is_vegetarian %}veg{% else %}nonveg{% endif %}" title="{% if item.is_vegetarian %}Vegetarian{% else %}Non-vegetarian{% endif %}"></span>
+            <h3 class="dish-name">{{ item.name }}</h3>
+          </div>
+          <p class="dish-desc">{{ item.description }}</p>
+          <div class="mt-auto d-flex align-items-center justify-content-between">
+            <div>
+              <span class="price">{{ CURRENCY }}{{ item.price|floatformat:"-2" }}</span>
+              <span class="badge {% if item.is_vegetarian %}text-bg-success{% else %}text-bg-danger{% endif %} ms-1">{% if item.is_vegetarian %}Veg{% else %}Non-veg{% endif %}</span>
+            </div>
+            {% if item.is_available %}
+            <div class="dish-ctl" data-id="{{ item.pk }}">
+              <button type="button" class="btn btn-add" data-action="add"><i class="bi bi-plus-lg"></i> Add</button>
+              <div class="stepper d-none">
+                <button type="button" data-action="dec" aria-label="Decrease"><i class="bi bi-dash"></i></button>
+                <span class="qty">1</span>
+                <button type="button" data-action="inc" aria-label="Increase"><i class="bi bi-plus"></i></button>
+              </div>
+            </div>
+            {% else %}<span class="badge text-bg-secondary">Sold out</span>{% endif %}
+          </div>
+        </div>
+      </article>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}{% empty %}
+<p class="text-muted">The menu is empty. Add categories and items in the admin.</p>
+{% endfor %}
+<p id="noMatch" class="text-muted d-none">Nothing matches these filters.</p>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/menu.js' %}"></script>{% endblock %}

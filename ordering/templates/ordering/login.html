@@ -1,0 +1,22 @@
+{% extends "ordering/base.html" %}
+{% block title %}Staff login{% endblock %}
+{% block content %}
+<div class="narrow">
+  <h1 class="page-title">Staff login</h1>
+  <p class="text-muted">The kitchen dashboard is for staff accounts only.</p>
+  <form method="post" class="summary">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="mb-3">
+      <label class="form-label" for="id_username">Username</label>
+      <input type="text" name="username" id="id_username" class="form-control" autofocus required autocomplete="username">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="id_password">Password</label>
+      <input type="password" name="password" id="id_password" class="form-control" required autocomplete="current-password">
+    </div>
+    <input type="hidden" name="next" value="{{ next|default:'/kitchen/' }}">
+    <button class="btn btn-pine" type="submit">Log in</button>
+  </form>
+</div>
+{% endblock %}

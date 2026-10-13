@@ -1,0 +1,48 @@
+{% extends "ordering/base.html" %}
+{% load static %}
+{% block title %}Your cart{% endblock %}
+{% block content %}
+<h1 class="page-title">Your cart</h1>
+<noscript><div class="alert alert-warning">JavaScript is required to use the cart.</div></noscript>
+
+<div id="cartWarnings"></div>
+
+<div id="emptyCart" class="empty-state d-none">
+  <i class="bi bi-basket3"></i>
+  <p>Nothing here yet.</p>
+  <a class="btn btn-pine" href="{% url 'menu' %}">Browse the menu</a>
+</div>
+
+<div id="cartContent" class="row g-4 d-none">
+  <div class="col-lg-7">
+    <div id="cartLines" class="cart-lines"></div>
+    <a class="btn btn-link px-0 mt-2" href="{% url 'menu' %}"><i class="bi bi-arrow-left"></i> Add more items</a>
+  </div>
+
+  <div class="col-lg-5">
+    <form method="post" action="{% url 'checkout' %}" id="checkoutForm" class="summary">
+      {% csrf_token %}
+      <dl class="totals">
+        <div><dt>Subtotal</dt><dd id="subtotal">–</dd></div>
+        <div><dt>GST ({{ TAX_PERCENT }}%)</dt><dd id="tax">–</dd></div>
+        <div class="grand"><dt>Total</dt><dd id="grand">–</dd></div>
+      </dl>
+
+      <h2 class="h6 mt-4 mb-3">Where should we bring it?</h2>
+      {{ form.non_field_errors }}
+      {% for field in form %}
+      <div class="mb-3">
+        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% for e in field.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+      </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-pine w-100 btn-lg" id="placeOrder">Place order</button>
+      <p class="small text-muted mt-2 mb-0">Totals are re-checked by the kitchen system when you place the order.</p>
+    </form>
+  </div>
+</div>
+
+{{ menu_data|json_script:"menu-data" }}
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/cart_page.js' %}"></script>{% endblock %}
